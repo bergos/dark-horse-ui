@@ -1,0 +1,39 @@
+<dom-module id="dh-light">
+  <template>
+    <h2>{{light.label}}</h2>
+
+    <bs-button-toggle active="{{active}}">on/off</bs-button-toggle>
+  </template>
+
+  <script>
+    Polymer({
+      is: 'dh-light',
+      properties: {
+        iri: String,
+        light: Object,
+        active: {
+          type: Boolean,
+          notify: true
+        }
+      },
+      listeners: {
+        'active-changed': 'handleChange',
+      },
+      ready: function () {
+        var self = this
+
+        DarkHorse.fetch(this.iri).then(function (light) {
+          self.light = light
+          self.active = light.state === DarkHorse.context.on
+        })
+      },
+      handleChange: function () {
+        var newState = new DarkHorse.Object(this.iri)
+
+        newState.state = this.active ? DarkHorse.context.on : DarkHorse.context.off
+
+        this.light.put(newState)
+      }
+    })
+  </script>
+</dom-module>

@@ -1,0 +1,37 @@
+<dom-module id="dh-room">
+  <template>
+    <h2>[[room.label]]</h2>
+
+    <bs-row>
+      <template is="dom-repeat" items="{{deviceIRIs}}">
+        <bs-column span="6">
+          <bs-well>
+            <dh-thing iri="[[item]]"></dh-thing>
+          </bs-well>
+        </bs-column>
+      </template>
+    </bs-row>
+  </template>
+
+  <script>
+    Polymer({
+      is: 'dh-room',
+      properties: {
+        iri: String,
+        room: Object,
+        deviceIRIs: Array
+      },
+      ready: function () {
+        var self = this
+
+        DarkHorse.fetch(this.iri).then(function (room) {
+          self.room = room
+
+          self.deviceIRIs = room.device.map(function (device) {
+            return device.iri().toString()
+          })
+        })
+      }
+    })
+  </script>
+</dom-module>

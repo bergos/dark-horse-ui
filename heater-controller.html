@@ -1,0 +1,31 @@
+<dom-module id="dh-heater-controller">
+  <template>
+    <h2>{{heaterController.label}}</h2>
+
+    <bs-form-horizontal>
+      <bs-form-group-horizontal span="4" label="Temperature" for="temperature">
+        <bs-text id="temperature" value="{{heaterController.temperature}}" readonly="true"></bs-text>
+      </bs-form-group-horizontal>
+      <bs-form-group-horizontal span="4" label="desiredTemperature" for="desiredTemperature">
+        <bs-text id="desiredTemperature" value="{{heaterController.desiredTemperature}}" readonly="true"></bs-text>
+      </bs-form-group-horizontal>
+    </bs-form-horizontal>
+  </template>
+
+  <script>
+    Polymer({
+      is: 'dh-heater-controller',
+      properties: {
+        iri: String,
+        heaterController: Object
+      },
+      ready: function () {
+        var self = this
+
+        DarkHorse.fetch(this.iri).then(function (heaterController) {
+          self.heaterController = heaterController
+        })
+      }
+    })
+  </script>
+</dom-module>

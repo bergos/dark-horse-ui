@@ -1,0 +1,31 @@
+<dom-module id="dh-thermometer">
+  <template>
+    <h2>{{heaterController.label}}</h2>
+
+    <bs-form-horizontal>
+      <bs-form-group-horizontal span="4" label="Temperature" for="temperature">
+        <bs-text id="temperature" value="{{thermometer.temperature}}" readonly="true"></bs-text>
+      </bs-form-group-horizontal>
+      <bs-form-group-horizontal span="4" label="Humidity" for="humidity">
+        <bs-text id="humidity" value="{{thermometer.humidity}}" readonly="true"></bs-text>
+      </bs-form-group-horizontal>
+    </bs-form-horizontal>
+  </template>
+
+  <script>
+    Polymer({
+      is: 'dh-thermometer',
+      properties: {
+        iri: String,
+        thermometer: Object
+      },
+      ready: function () {
+        var self = this
+
+        DarkHorse.fetch(this.iri).then(function (thermometer) {
+          self.thermometer = thermometer
+        })
+      }
+    })
+  </script>
+</dom-module>

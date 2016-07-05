@@ -1,0 +1,56 @@
+<dom-module id="dh-apartment">
+  <template>
+    <h1>[[apartment.label]]</h1>
+
+    <bs-tab-panel tabs="{{tabs}}">
+      <template is="dom-repeat" items="[[rooms]]">
+        <bs-tab-pane id="[[item.iri]]">
+          <dh-room iri="[[item.iri]]" room="{{item.room}}"></dh-room>
+        </bs-tab-pane>
+      </template>
+  </template>
+
+  <script>
+    Polymer({
+      is: 'dh-apartment',
+      properties: {
+        iri: String,
+        apartment: Object,
+        rooms: Array,
+        tabs: Array
+      },
+      ready: function () {
+        var self = this
+
+        return DarkHorse.fetch(this.iri).then(function (apartment) {
+          self.apartment = apartment
+
+          self.rooms = apartment.room.map(function (room) {
+            return {
+              iri: room.iri().toString(),
+              room: room
+            }
+          })
+
+          self.tabs = self.rooms.map(function (room) {
+            return {
+              id: room.iri,
+              name: room.label || room.iri
+            }
+          })
+
+          return Promise.all(self.rooms.map(function (room) {
+            return room.room.get().then(function (room) {
+              return {
+                id: room.iri().toString(),
+                name: room.label || room.iri
+              }
+            })
+          })).then(function (tabs) {
+            self.tabs = tabs
+          })
+        })
+      }
+    })
+  </script>
+</dom-module>

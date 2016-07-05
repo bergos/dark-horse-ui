@@ -1,0 +1,42 @@
+<dom-module id="dh-thing">
+  <template>
+    <template is="dom-if" if="{{isType(thing, context.Apartment)}}">
+      <dh-apartment iri="[[iri]]"></dh-apartment>
+    </template>
+    <template is="dom-if" if="{{isType(thing, context.HeaterController)}}">
+      <dh-heater-controller iri="[[iri]]"></dh-heater-controller>
+    </template>
+    <template is="dom-if" if="{{isType(thing, context.Light)}}">
+      <dh-light iri="[[iri]]"></dh-light>
+    </template>
+    <template is="dom-if" if="{{isType(thing, context.Room)}}">
+      <dh-room iri="[[iri]]"></dh-room>
+    </template>
+    <template is="dom-if" if="{{isType(thing, context.Thermometer)}}">
+      <dh-thermometer iri="[[iri]]"></dh-thermometer>
+    </template>
+  </template>
+
+  <script>
+    Polymer({
+      is: 'dh-thing',
+      properties: {
+        iri: String,
+        context: Object,
+        thing: Object
+      },
+      ready: function () {
+        var self = this
+
+        this.context = DarkHorse.context
+
+        return DarkHorse.fetch(this.iri).then(function (thing) {
+          self.thing = thing
+        })
+      },
+      isType: function (thing, type) {
+        return thing.type && thing.type.iri().toString() === type
+      }
+    })
+  </script>
+</dom-module>
