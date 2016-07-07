@@ -4,7 +4,8 @@
   "description": "Polymer based UI for Dark Horse",
   "main": "index.js",
   "scripts": {
-    "install": "node build"
+    "build-dist": "node build",
+    "prepublish": "npm run build-dist"
   },
   "repository": {
     "type": "git",
@@ -21,6 +22,7 @@
   "homepage": "https://github.com/bergos/dark-horse-ui",
   "dependencies": {
     "Polymer": "^1.4.0",
+    "babelify": "^7.3.0",
     "bootstrap-polymer": "git://github.com/bergos/bootstrap-polymer.git#master",
     "browserify": "^13.0.1",
     "dark-horse-thing": "git://github.com/bergos/dark-horse-thing.git#master",
