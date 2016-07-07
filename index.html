@@ -13,9 +13,14 @@
   <bs-container-fluid>
     <bs-row>
       <bs-column span="6" offset="3">
-        <dh-apartment iri="http://localhost:8080/"></dh-apartment>
+        <div id="dh-container"></div>
       </bs-column>
     </bs-row>
   </bs-container-fluid>
+  <script>
+    var iri = window.location.protocol + '//' + window.location.host + '/'
+
+    document.getElementById('dh-container').innerHTML = '<dh-thing iri="' + iri + '"></dh-thing>'
+  </script>
 </body>
 </html>
