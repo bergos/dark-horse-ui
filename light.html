@@ -16,15 +16,15 @@
           notify: true
         }
       },
-      listeners: {
-        'active-changed': 'handleChange',
-      },
       ready: function () {
         var self = this
 
         DarkHorse.fetch(this.iri).then(function (light) {
           self.light = light
-          self.active = light.state === DarkHorse.context.on
+
+          self.active = light.state.iri().equals(DarkHorse.context.on)
+
+          self.listen(self, 'active-changed', 'handleChange')
         })
       },
       handleChange: function () {
