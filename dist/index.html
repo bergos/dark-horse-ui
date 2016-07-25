@@ -19756,38 +19756,48 @@ d.parent(".dropdown-menu").length&&(d=d.closest("li.dropdown").addClass("active"
 </div><script>(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.DarkHorse = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 'use strict'
 
+var ns = 'http://ns.bergnet.org/dark-horse#'
+
 var context = {
-  Apartment: 'http://ns.bergnet.org/dark-horse#Apartment',
-  HeaterController: 'http://ns.bergnet.org/dark-horse#HeaterController',
-  Light: 'http://ns.bergnet.org/dark-horse#Light',
-  PowerSocket: 'http://ns.bergnet.org/dark-horse#PowerSocket',
-  Room: 'http://ns.bergnet.org/dark-horse#Room',
-  Thermometer: 'http://ns.bergnet.org/dark-horse#Thermometer',
-  Thing: 'http://ns.bergnet.org/dark-horse#Thing',
-  desiredTemperature: 'http://ns.bergnet.org/dark-horse#desiredTemperature',
+  Apartment: ns + 'Apartment',
+  Device: ns + 'Device',
+  HeaterController: ns + 'HeaterController',
+  Hygrometer: ns + 'Hygrometer',
+  Light: ns + 'Light',
+  PowerSocket: ns + 'PowerSocket',
+  Room: ns + 'Room',
+  Switchable: ns + 'Switchable',
+  Thermometer: ns + 'Thermometer',
+  Thing: ns + 'Thing',
+  desiredTemperature: ns + 'desiredTemperature',
   device: {
-    '@id': 'http://ns.bergnet.org/dark-horse#device',
+    '@id': ns + 'device',
     '@array': true
   },
-  humidity: 'http://ns.bergnet.org/dark-horse#humidity',
+  endpoint: {
+    '@id': ns + 'endpoint',
+    '@type': '@id'
+  },
+  humidity: ns + 'humidity',
   label: 'http://www.w3.org/2000/01/rdf-schema#label',
-  lowBatteryPower: 'http://ns.bergnet.org/dark-horse#lowBatteryPower',
-  on: 'http://ns.bergnet.org/dark-horse#on',
-  off: 'http://ns.bergnet.org/dark-horse#off',
+  lowBatteryPower: ns + 'lowBatteryPower',
+  on: ns + 'on',
+  off: ns + 'off',
   room: {
-    '@id': 'http://ns.bergnet.org/dark-horse#room',
+    '@id': ns + 'room',
     '@array': true
   },
   state: {
-    '@id': 'http://ns.bergnet.org/dark-horse#state',
+    '@id': ns + 'state',
     '@type': '@id'
   },
-  temperature: 'http://ns.bergnet.org/dark-horse#temperature',
+  temperature: ns + 'temperature',
   type: {
     '@id': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type',
-    '@type': '@id'
+    '@type': '@id',
+    '@array': true
   },
-  valve: 'http://ns.bergnet.org/dark-horse#valve'
+  valve: ns + 'valve'
 }
 
 module.exports = context
@@ -64749,6 +64759,66 @@ function extend() {
     })
   </script>
 </dom-module>
+<dom-module id="dh-generic" assetpath="/">
+  <template>
+    <h2>{{generic.label}}</h2>
+
+    <bs-form-horizontal>
+      <template is="dom-repeat" items="[[values]]">
+        <bs-form-group-horizontal span="4" label="[[item.key]]" for="[[item.key]]">
+          <bs-text id="[[item.key]]" value="[[item.value]]" readonly="true"></bs-text>
+        </bs-form-group-horizontal>
+      </template>
+    </bs-form-horizontal>
+  </template>
+
+  <script>
+    Polymer({
+      is: 'dh-generic',
+      properties: {
+        iri: String,
+        generic: Object,
+        values: Array
+      },
+      ready: function () {
+        var self = this
+
+        DarkHorse.fetch(this.iri).then(function (generic) {
+          self.generic = generic
+
+          self.values = Object.getOwnPropertyNames(self.generic).filter(function (property) {
+            if (property.indexOf('http') === 0 || property.indexOf('_') === 0) {
+              return false
+            }
+
+            if (typeof self.generic[property] === 'undefined') {
+              return false
+            }
+
+            var value = self.generic[property]
+
+            if (typeof value === 'object' && typeof value.iri !== 'function') {
+              return false
+            }
+
+            return true
+          }).map(function (property) {
+            var value = self.generic[property]
+
+            if (typeof value === 'object' && typeof value.iri === 'function') {
+              value = value.iri().toString()
+            }
+
+            return {
+              key: property,
+              value: value
+            }
+          })
+        })
+      }
+    })
+  </script>
+</dom-module>
 <dom-module id="dh-heater-controller" assetpath="/">
   <template>
     <h2>{{heaterController.label}}</h2>
@@ -64901,8 +64971,11 @@ function extend() {
     <template is="dom-if" if="{{isType(thing, context.Room)}}">
       <dh-room iri="[[iri]]"></dh-room>
     </template>
-    <template is="dom-if" if="{{isType(thing, context.Thermometer)}}">
+    <template is="dom-if" if="{{isType(thing, context.Hygrometer, context.Thermometer)}}">
       <dh-thermometer iri="[[iri]]"></dh-thermometer>
+    </template>
+    <template is="dom-if" if="{{isType(thing, context.Switchable)}}">
+      <dh-generic iri="[[iri]]"></dh-generic>
     </template>
   </template>
 
@@ -64923,8 +64996,16 @@ function extend() {
           self.thing = thing
         })
       },
-      isType: function (thing, type) {
-        return thing.type && thing.type.iri().toString() === type
+      isType: function (thing) {
+        if (!thing.type) {
+          return false
+        }
+
+        var types = Array.prototype.slice.call(arguments, 1)
+
+        return thing.type.reduce(function (isType, type) {
+          return isType || types.indexOf(type.iri().toString()) !== -1
+        })
       }
     })
   </script>

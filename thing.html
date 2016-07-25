@@ -12,8 +12,11 @@
     <template is="dom-if" if="{{isType(thing, context.Room)}}">
       <dh-room iri="[[iri]]"></dh-room>
     </template>
-    <template is="dom-if" if="{{isType(thing, context.Thermometer)}}">
+    <template is="dom-if" if="{{isType(thing, context.Hygrometer, context.Thermometer)}}">
       <dh-thermometer iri="[[iri]]"></dh-thermometer>
+    </template>
+    <template is="dom-if" if="{{isType(thing, context.Switchable)}}">
+      <dh-generic iri="[[iri]]"></dh-generic>
     </template>
   </template>
 
@@ -34,8 +37,16 @@
           self.thing = thing
         })
       },
-      isType: function (thing, type) {
-        return thing.type && thing.type.iri().toString() === type
+      isType: function (thing) {
+        if (!thing.type) {
+          return false
+        }
+
+        var types = Array.prototype.slice.call(arguments, 1)
+
+        return thing.type.reduce(function (isType, type) {
+          return isType || types.indexOf(type.iri().toString()) !== -1
+        })
       }
     })
   </script>

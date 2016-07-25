@@ -1,0 +1,60 @@
+<dom-module id="dh-generic">
+  <template>
+    <h2>{{generic.label}}</h2>
+
+    <bs-form-horizontal>
+      <template is="dom-repeat" items="[[values]]">
+        <bs-form-group-horizontal span="4" label="[[item.key]]" for="[[item.key]]">
+          <bs-text id="[[item.key]]" value="[[item.value]]" readonly="true"></bs-text>
+        </bs-form-group-horizontal>
+      </template>
+    </bs-form-horizontal>
+  </template>
+
+  <script>
+    Polymer({
+      is: 'dh-generic',
+      properties: {
+        iri: String,
+        generic: Object,
+        values: Array
+      },
+      ready: function () {
+        var self = this
+
+        DarkHorse.fetch(this.iri).then(function (generic) {
+          self.generic = generic
+
+          self.values = Object.getOwnPropertyNames(self.generic).filter(function (property) {
+            if (property.indexOf('http') === 0 || property.indexOf('_') === 0) {
+              return false
+            }
+
+            if (typeof self.generic[property] === 'undefined') {
+              return false
+            }
+
+            var value = self.generic[property]
+
+            if (typeof value === 'object' && typeof value.iri !== 'function') {
+              return false
+            }
+
+            return true
+          }).map(function (property) {
+            var value = self.generic[property]
+
+            if (typeof value === 'object' && typeof value.iri === 'function') {
+              value = value.iri().toString()
+            }
+
+            return {
+              key: property,
+              value: value
+            }
+          })
+        })
+      }
+    })
+  </script>
+</dom-module>
